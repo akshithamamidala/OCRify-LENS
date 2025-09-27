@@ -279,12 +279,10 @@ with st.expander("✨ Featurization Options"):
 import streamlit as st
 import pyttsx3
 from utils.ocr_utils import extract_text_from_pdf
-import os
 import cv2
 import numpy as np
 from pdf2image import convert_from_path
 from PIL import Image
-import pytesseract
 from deep_translator import GoogleTranslator
 from langdetect import detect, DetectorFactory
 
@@ -295,8 +293,14 @@ DetectorFactory.seed = 0
 # -------------------------------
 # Configure Tesseract path dynamically
 # On Linux (Streamlit Cloud), system path is used automatically
+import os
+import pytesseract
+
+# Only set path on Windows
 if os.name == 'nt':
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# On Streamlit Cloud / Linux, Tesseract is installed via packages.txt and found automatically
+
 
 # -------------------------------
 # Streamlit page config
