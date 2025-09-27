@@ -292,8 +292,15 @@ import pytesseract
 from deep_translator import GoogleTranslator
 from langdetect import detect, DetectorFactory
 
-import shutil
-st.write("Tesseract binary:", shutil.which("tesseract"))
+import subprocess
+import streamlit as st
+
+try:
+    result = subprocess.run(["tesseract", "--version"], capture_output=True, text=True)
+    st.write("Tesseract is installed:", result.stdout.splitlines()[0])
+except FileNotFoundError:
+    st.write("Tesseract binary not found!")
+
 
 
 
