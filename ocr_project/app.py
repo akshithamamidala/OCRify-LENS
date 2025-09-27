@@ -280,7 +280,7 @@ with st.expander("✨ Featurization Options"):
 
 
 
-import streamlit as st
+'''import streamlit as st
 import pyttsx3
 from utils.ocr_utils import extract_text_from_pdf
 import os
@@ -413,6 +413,120 @@ with st.expander("✨ Featurization Options"):
     # Example:
     # st.image(deskewed_path, caption="🖼️ Deskewed Image", width='stretch')
     # st.image(binarized_path, caption="🖼️ Binarized Image", width='stretch')
-    # Continue updating all other image previews similarly
+    # Continue updating all other image previews similarly'''
+
+
+
+import streamlit as st
+from utils.ocr_utils import extract_text_from_pdf
+import os
+from pdf2image import convert_from_path
+from PIL import Image
+import pytesseract
+from deep_translator import GoogleTranslator
+from langdetect import detect, DetectorFactory
+import cv2
+import numpy as np
+import pyttsx3
+import shutil
+
+# -------------------------------
+# Check Tesseract binary
+st.write("Tesseract binary:", shutil.which("tesseract"))
+
+# -------------------------------
+# Deterministic language detection
+DetectorFactory.seed = 0
+
+# -------------------------------
+# Streamlit page config
+st.set_page_config(page_title="OCRify LENS", layout="centered")
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.join(BASE_DIR, "assets")
+
+st.markdown(
+    """
+    <h1 style='text-align: center;'>📄 OCRify LENS</h1>
+    <p style='text-align: center;'>Upload scanned documents to extract text and enhance images</p>
+    """,
+    unsafe_allow_html=True
+)
+
+uploaded_file = st.file_uploader("📄 Upload a scanned PDF or image", type=["pdf", "jpg", "jpeg", "png"])
+
+doc_text = ""
+image_path = ""
+
+if uploaded_file:
+    file_ext = uploaded_file.name.split('.')[-1].lower()
+
+    # PDF upload
+    if file_ext == 'pdf':
+        with open("temp_file.pdf", "wb") as f:
+            f.write(uploaded_file.read())
+        with st.spinner("🔍 Extracting text from PDF with OCR..."):
+            doc_text = extract_text_from_pdf("temp_file.pdf")
+        images = convert_from_path("temp_file.pdf", dpi=300)
+        first_page = images[0]
+        image_path = "first_page.png"
+        first_page.save(image_path)
+
+    # Image upload
+    elif file_ext in ['jpg', 'jpeg', 'png']:
+        image_path = f"temp_image.{file_ext}"
+        with open(image_path, "wb") as f:
+            f.write(uploaded_file.read())
+        with st.spinner("🔍 Extracting text from image with OCR..."):
+            image = Image.open(image_path)
+            doc_text = pytesseract.image_to_string(image)
+
+    st.success("✅ Text extracted successfully!")
+
+    if image_path:
+        st.image(image_path, caption="🖼️ Uploaded Image Preview", width=400)
+
+# -------------------------------
+# OCR with language selection
+with st.expander("✨ Featurization Options"):
+    if st.checkbox("📝 Extract Text from Image"):
+        if image_path:
+            available_langs = {
+                "English": "eng",
+                "Hindi": "hin",
+                "Telugu": "tel"
+            }
+            selected_langs = st.multiselect(
+                "🌐 Select OCR language(s)", list(available_langs.keys()), default=["English"]
+            )
+            selected_codes = "+".join([available_langs[lang] for lang in selected_langs])
+
+            with st.spinner(f"🔍 Extracting text using languages: {selected_codes}"):
+                try:
+                    image = Image.open(image_path)
+                    extracted_text = pytesseract.image_to_string(image, lang=selected_codes)
+                    st.text_area("📟 Extracted Text", value=extracted_text, height=200)
+                except pytesseract.TesseractError as e:
+                    st.error(f"❌ OCR failed: {e}")
+                    extracted_text = ""
+
+            # Translation
+            if extracted_text and st.checkbox("🌍 Translate to English"):
+                with st.spinner("🔤 Detecting language and translating..."):
+                    try:
+                        detected_lang = detect(extracted_text)
+                        translated = GoogleTranslator(source=detected_lang, target='en').translate(extracted_text)
+                        st.text(f"🔎 Detected language: {detected_lang}")
+                        st.text_area("📘 Translated Text", value=translated, height=200)
+                        if st.button("🔊 Text-to-Speech"):
+                            engine = pyttsx3.init()
+                            engine.say(translated)
+                            engine.runAndWait()
+                            st.success("✅ Voice playback completed!")
+                    except Exception as e:
+                        st.error(f"❌ Translation failed: {e}")
+        else:
+            st.warning("⚠️ No image uploaded for OCR.")
+
 
 
