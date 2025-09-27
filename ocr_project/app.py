@@ -288,9 +288,18 @@ import cv2
 import numpy as np
 from pdf2image import convert_from_path
 from PIL import Image
-import pytesseract
+#import pytesseract
 from deep_translator import GoogleTranslator
 from langdetect import detect, DetectorFactory
+
+import shutil
+import pytesseract
+
+if shutil.which("tesseract"):
+    print("Tesseract is installed at:", shutil.which("tesseract"))
+else:
+    print("Tesseract NOT found!")
+
 
 # -------------------------------
 # Deterministic language detection
