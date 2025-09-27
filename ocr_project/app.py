@@ -289,15 +289,14 @@ from deep_translator import GoogleTranslator
 from langdetect import detect, DetectorFactory
 
 # -------------------------------
-# Set deterministic language detection
+# Deterministic language detection
 DetectorFactory.seed = 0
 
 # -------------------------------
 # Configure Tesseract path dynamically
 if os.name == 'nt':
-    # Windows path
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-# On Linux (Streamlit Cloud), Tesseract uses system path automatically
+# On Linux/Streamlit Cloud, system path is used automatically
 
 # -------------------------------
 # Streamlit page config
@@ -347,7 +346,7 @@ if uploaded_file:
 
     # ✅ Show Uploaded Image Preview
     if image_path:
-        st.image(image_path, caption="🖼️ Uploaded Image Preview", width=400)
+        st.image(image_path, caption="🖼️ Uploaded Image Preview", width='stretch')
         uploaded_image_previewed = True
 
 # -------------------------------
@@ -395,8 +394,9 @@ with st.expander("✨ Featurization Options"):
             st.warning("⚠️ No image found to extract text.")
 
     # -------------------------------
-    # Image Processing Features (Invert, Binarize, Deskew, Font Thickness, Remove Borders)
-    # Keep the rest of your code here as-is
-    # Just ensure `pytesseract.pytesseract.tesseract_cmd` is not hardcoded anywhere else
-
-
+    # Image processing features (Invert, Binarize, Deskew, Font Thickness, Remove Borders)
+    # For all st.image calls, replace use_container_width=True with width='stretch'
+    # Example:
+    # st.image(deskewed_path, caption="🖼️ Deskewed Image", width='stretch')
+    # st.image(binarized_path, caption="🖼️ Binarized Image", width='stretch')
+    # Continue updating all other image previews similarly
