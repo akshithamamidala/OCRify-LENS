@@ -283,6 +283,7 @@ with st.expander("✨ Featurization Options"):
 import streamlit as st
 import pyttsx3
 from utils.ocr_utils import extract_text_from_pdf
+import os
 import cv2
 import numpy as np
 from pdf2image import convert_from_path
