@@ -276,13 +276,19 @@ with st.expander("✨ Featurization Options"):
         else:
             st.warning("⚠️ No image found to remove borders.")'''
 
+
+
+
+
 import streamlit as st
 import pyttsx3
 from utils.ocr_utils import extract_text_from_pdf
+import os
 import cv2
 import numpy as np
 from pdf2image import convert_from_path
 from PIL import Image
+import pytesseract
 from deep_translator import GoogleTranslator
 from langdetect import detect, DetectorFactory
 
@@ -292,15 +298,9 @@ DetectorFactory.seed = 0
 
 # -------------------------------
 # Configure Tesseract path dynamically
-# On Linux (Streamlit Cloud), system path is used automatically
-import os
-import pytesseract
-
-# Only set path on Windows
 if os.name == 'nt':
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-# On Streamlit Cloud / Linux, Tesseract is installed via packages.txt and found automatically
-
+# On Linux/Streamlit Cloud, system path is used automatically
 
 # -------------------------------
 # Streamlit page config
@@ -321,7 +321,7 @@ uploaded_file = st.file_uploader("📄 Upload a scanned PDF or image", type=["pd
 
 doc_text = ""
 image_path = ""
-uploaded_image_previewed = False
+uploaded_image_previewed = False  # Track if we showed preview
 
 if uploaded_file:
     file_ext = uploaded_file.name.split('.')[-1].lower()
@@ -348,6 +348,7 @@ if uploaded_file:
 
     st.success("✅ Text extracted successfully!")
 
+    # ✅ Show Uploaded Image Preview
     if image_path:
         st.image(image_path, caption="🖼️ Uploaded Image Preview", width='stretch')
         uploaded_image_previewed = True
@@ -363,11 +364,7 @@ with st.expander("✨ Featurization Options"):
                 "Kannada": "kan", "Gujarati": "guj", "Marathi": "mar", "Punjabi": "pan",
                 "Urdu": "urd", "French": "fra", "German": "deu", "Spanish": "spa"
             }
-            selected_langs = st.multiselect(
-                "🌐 Select OCR language(s) to use", 
-                list(available_langs.keys()), 
-                default=["English"]
-            )
+            selected_langs = st.multiselect("🌐 Select OCR language(s) to use", list(available_langs.keys()), default=["English"])
             selected_codes = "+".join([available_langs[lang] for lang in selected_langs])
 
             with st.spinner(f"🔍 Extracting text using languages: {selected_codes}"):
@@ -386,11 +383,10 @@ with st.expander("✨ Featurization Options"):
                         translated = GoogleTranslator(source=detected_lang, target='en').translate(extracted_text)
                         st.text(f"🔎 Detected language: {detected_lang}")
                         st.text_area("📘 Translated to English", value=translated, height=200)
-
                         if st.button("🔊 Convert Translated Text to Speech"):
                             try:
                                 engine = pyttsx3.init()
-                                engine.setProperty('rate', 150)
+                                engine.setProperty('rate', 150)  # Optional: Adjust speed
                                 engine.say(translated)
                                 engine.runAndWait()
                                 st.success("✅ Voice playback completed!")
@@ -402,7 +398,9 @@ with st.expander("✨ Featurization Options"):
             st.warning("⚠️ No image found to extract text.")
 
     # -------------------------------
-    # Example for image processing (deskew, binarize, invert)
-    # Replace all st.image(..., use_container_width=True) with width='stretch'
+    # Image processing features (Invert, Binarize, Deskew, Font Thickness, Remove Borders)
+    # For all st.image calls, replace use_container_width=True with width='stretch'
     # Example:
     # st.image(deskewed_path, caption="🖼️ Deskewed Image", width='stretch')
+    # st.image(binarized_path, caption="🖼️ Binarized Image", width='stretch')
+    # Continue updating all other image previews similarly
