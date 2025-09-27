@@ -309,8 +309,7 @@ DetectorFactory.seed = 0
 
 # -------------------------------
 # Configure Tesseract path dynamically
-if os.name == 'nt':
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
 # On Linux/Streamlit Cloud, system path is used automatically
 
 # -------------------------------
