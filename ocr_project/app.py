@@ -556,4 +556,4 @@ with st.expander("✨ Featurization Options"):
                 with open(border_removed_path, "rb") as f:
                     st.download_button("📥 Download Cleaned Image", f, "border_removed_strict.png", mime="image/png")
         else:
-            st.warning("⚠️ No image found to remove borders.")'''
+            st.warning("⚠️ No image found to remove borders.")
