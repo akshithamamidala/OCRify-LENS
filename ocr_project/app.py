@@ -293,7 +293,6 @@ from deep_translator import GoogleTranslator
 from langdetect import detect, DetectorFactory
 
 import subprocess
-import streamlit as st
 
 try:
     result = subprocess.run(["tesseract", "--version"], capture_output=True, text=True)
